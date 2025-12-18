@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互联网动物人格测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        .title {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            margin-bottom: 50px;
+        }
+
+        .circle-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 0 auto;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .circle:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        .circle-text {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .circle-hint {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* 脉冲动效 */
+        .pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            opacity: 0;
+        }
+
+        .pulsing .pulse-ring {
+            animation: pulse 3s ease-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                width: 200px;
+                height: 200px;
+                opacity: 0.8;
+            }
+            100% {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+            }
+        }
+
+        /* 进度环 */
+        .progress-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-90deg);
+            width: 220px;
+            height: 220px;
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.8);
+            stroke-width: 4;
+            stroke-dasharray: 691.15; /* 2 * π * 110 */
+            stroke-dashoffset: 691.15;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        /* 结果展示 */
+        .result-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-container.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideUp 0.5s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .result-emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .result-arrow {
+            font-size: 24px;
+            color: #667eea;
+            margin: 15px 0;
+        }
+
+        .result-description {
+            font-size: 24px;
+            color: #f5576c;
+            font-weight: bold;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .result-detail {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .retry-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-weight: bold;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .retry-button:active {
+            transform: translateY(0);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .title {
+                font-size: 24px;
+            }
+
+            .circle {
+                width: 180px;
+                height: 180px;
+            }
+
+            .pulse-ring {
+                width: 180px;
+                height: 180px;
+            }
+
+            .progress-ring {
+                width: 200px;
+                height: 200px;
+            }
+
+            .result-card {
+                padding: 40px 30px;
+            }
+
+            .result-title {
+                font-size: 26px;
+            }
+
+            .result-description {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">互联网动物人格测试</h1>
+        <p class="subtitle">长按中央圆形区域3秒，发现你的互联网人格</p>
+        
+        <div class="circle-container" id="circleContainer">
+            <svg class="progress-ring" id="progressRing">
+                <circle class="progress-ring-circle" cx="110" cy="110" r="110"></circle>
+            </svg>
+            <div class="pulse-ring" id="pulseRing1"></div>
+            <div class="pulse-ring" id="pulseRing2"></div>
+            <div class="pulse-ring" id="pulseRing3"></div>
+            <div class="circle" id="circle">
+                <div class="circle-text">长按我</div>
+                <div class="circle-hint">发现你的人格</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+        <div class="result-card">
+            <div class="result-emoji" id="resultEmoji">🐧</div>
+            <div class="result-title" id="resultTitle">社恐企鹅</div>
+            <div class="result-arrow">↓</div>
+            <div class="result-description" id="resultDescription">"线下哑巴·线上话痨"</div>
+            <div class="result-detail" id="resultDetail">
+                现实中的你沉默寡言，能不说话就不说话。但一到网上，键盘侠模式瞬间开启，表情包斗图、深夜长篇大论，简直判若两人！
+            </div>
+            <button class="retry-button" onclick="resetTest()">再测一次</button>
+        </div>
+    </div>
+
+    <script>
+        // 动物人格数据库
+        const personalities = [
+            {
+                emoji: '🐧',
+                title: '社恐企鹅',
+                description: '"线下哑巴·线上话痨"',
+                detail: '现实中的你沉默寡言，能不说话就不说话。但一到网上，键盘侠模式瞬间开启，表情包斗图、深夜长篇大论，简直判若两人！'
+            },
+            {
+                emoji: '🦥',
+                title: '摆烂树懒',
+                description: '"能躺着绝不坐着"',
+                detail: '你的人生信条就是：今天能拖到明天的事，为什么要今天做？工作摸鱼、生活躺平，但内心戏却比谁都丰富。'
+            },
+            {
+                emoji: '🦊',
+                title: '精明狐狸',
+                description: '"表面憨憨·实则精明"',
+                detail: '看起来人畜无害，实际上心里门儿清。该装傻时装傻，该精明时精明，游走在各个群聊之间如鱼得水。'
+            },
+            {
+                emoji: '🐱',
+                title: '高冷猫咪',
+                description: '"爱答不理·傲娇本娇"',
+                detail: '消息爱回不回，约饭看心情。但其实内心戏很足，只是懒得表达。偶尔的主动联系，那是真的把你当自己人了。'
+            },
+            {
+                emoji: '🐶',
+                title: '热情哈士奇',
+                description: '"社交牛逼症患者"',
+                detail: '见谁都自来熟，群聊氛围担当。虽然偶尔会犯二，但真诚热情的你总能给大家带来欢乐。'
+            },
+            {
+                emoji: '🦉',
+                title: '夜猫子猫头鹰',
+                description: '"白天废物·深夜暴躁"',
+                detail: '白天浑浑噩噩，一到晚上精神百倍。凌晨三点还在刷手机，早上八点起不来床。你的生物钟和全世界都不一样。'
+            },
+            {
+                emoji: '🐹',
+                title: '囤积仓鼠',
+                description: '"收藏从未停止·打开从未开始"',
+                detail: '购物车永远是满的，收藏夹塞得满满当当。各种教程、攻略、好物推荐统统收藏，但就是从来不看。'
+            },
+            {
+                emoji: '🦆',
+                title: '吃瓜鸭鸭',
+                description: '"一线吃瓜·从不缺席"',
+                detail: '互联网八卦第一时间到达现场，各路瓜田勤劳耕耘。虽然自己生活平淡，但别人的故事你比当事人还清楚。'
+            }
+        ];
+
+        let pressTimer = null;
+        let startTime = 0;
+        let isPressed = false;
+        const PRESS_DURATION = 3000; // 3秒
+
+        const circleContainer = document.getElementById('circleContainer');
+        const circle = document.getElementById('circle');
+        const progressRing = document.getElementById('progressRing');
+        const progressCircle = progressRing.querySelector('.progress-ring-circle');
+        const pulseRings = [
+            document.getElementById('pulseRing1'),
+            document.getElementById('pulseRing2'),
+            document.getElementById('pulseRing3')
+        ];
+        const resultContainer = document.getElementById('resultContainer');
+
+        const circumference = 2 * Math.PI * 110;
+        progressCircle.style.strokeDasharray = circumference;
+        progressCircle.style.strokeDashoffset = circumference;
+
+        // 开始长按
+        function startPress(e) {
+            e.preventDefault();
+            if (isPressed) return;
+            
+            isPressed = true;
+            startTime = Date.now();
+            
+            // 添加脉冲动效
+            circleContainer.classList.add('pulsing');
+            
+            // 开始进度动画
+            pressTimer = setInterval(updateProgress, 50);
+            
+            // 启动脉冲环动画
+            startPulseAnimation();
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / PRESS_DURATION, 1);
+            
+            const offset = circumference - (progress * circumference);
+            progressCircle.style.strokeDashoffset = offset;
+            
+            if (progress >= 1) {
+                completePress();
+            }
+        }
+
+        // 脉冲动画
+        function startPulseAnimation() {
+            pulseRings.forEach((ring, index) => {
+                setTimeout(() => {
+                    ring.style.animation = 'pulse 1s ease-out infinite';
+                }, index * 300);
+            });
+        }
+
+        // 停止脉冲动画
+        function stopPulseAnimation() {
+            pulseRings.forEach(ring => {
+                ring.style.animation = 'none';
+            });
+        }
+
+        // 结束长按
+        function endPress(e) {
+            e.preventDefault();
+            if (!isPressed) return;
+            
+            const elapsed = Date.now() - startTime;
+            
+            if (elapsed < PRESS_DURATION) {
+                // 未完成，重置
+                resetProgress();
+            }
+            
+            isPressed = false;
+        }
+
+        // 完成长按
+        function completePress() {
+            clearInterval(pressTimer);
+            isPressed = false;
+            
+            // 停止动画
+            circleContainer.classList.remove('pulsing');
+            stopPulseAnimation();
+            
+            // 显示结果
+            setTimeout(() => {
+                showResult();
+            }, 300);
+        }
+
+        // 重置进度
+        function resetProgress() {
+            clearInterval(pressTimer);
+            circleContainer.classList.remove('pulsing');
+            stopPulseAnimation();
+            progressCircle.style.strokeDashoffset = circumference;
+            isPressed = false;
+        }
+
+        // 显示结果
+        function showResult() {
+            // 随机选择一个人格
+            const personality = personalities[Math.floor(Math.random() * personalities.length)];
+            
+            document.getElementById('resultEmoji').textContent = personality.emoji;
+            document.getElementById('resultTitle').textContent = personality.title;
+            document.getElementById('resultDescription').textContent = personality.description;
+            document.getElementById('resultDetail').textContent = personality.detail;
+            
+            resultContainer.classList.add('show');
+        }
+
+        // 重新测试
+        function resetTest() {
+            resultContainer.classList.remove('show');
+            resetProgress();
+        }
+
+        // 事件监听
+        // 鼠标事件
+        circleContainer.addEventListener('mousedown', startPress);
+        circleContainer.addEventListener('mouseup', endPress);
+        circleContainer.addEventListener('mouseleave', endPress);
+
+        // 触摸事件（移动端）
+        circleContainer.addEventListener('touchstart', startPress);
+        circleContainer.addEventListener('touchend', endPress);
+        circleContainer.addEventListener('touchcancel', endPress);
+
+        // 防止拖拽
+        circleContainer.addEventListener('dragstart', (e) => e.preventDefault());
+    </script>
+</body>
+</html>
